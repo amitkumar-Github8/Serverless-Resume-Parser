@@ -1,8 +1,22 @@
 # Serverless-Resume-Parser
 
+![GitHub last commit](https://img.shields.io/github/last-commit/amitkumar-Github8/Serverless-Resume-Parser)
+![GitHub issues](https://img.shields.io/github/issues/amitkumar-Github8/Serverless-Resume-Parser)
+![GitHub stars](https://img.shields.io/github/stars/amitkumar-Github8/Serverless-Resume-Parser?style=social)
+
 Hey there! 👋
 
-Welcome to my Serverless Resume Parser project. I built this because I was tired of manually digging through resumes—so I figured, why not let AWS do the heavy lifting? This project lets you upload a PDF resume to S3, then automatically extracts the important stuff (like name, skills, education) using AWS Lambda and Textract. The results go into DynamoDB, and you'll get an email notification when it's done. Plus, everything's logged in CloudWatch so you can see what's happening under the hood.
+Welcome to my Serverless Resume Parser project. I built this because I was tired of manually digging through resumes—so I figured, why not let AWS do the heavy lifting? This project lets you upload a PDF resume to S3, then automatically extracts the important stuff (like name, skills, education) using AWS Lambda and Textract. The results go into DynamoDB, and you'll get an email notification when pdf is uploaded to the S3 bucket. Plus, everything's logged in CloudWatch so you can see what's happening under the hood.
+
+---
+
+## ✨ Features
+- Upload PDF resumes to S3 and trigger automatic parsing
+- Extracts name, email, phone, education, skills, projects, experience, and certifications
+- Stores structured data in DynamoDB
+- Sends email notifications via SNS
+- All activity is logged in CloudWatch for easy debugging
+- Fully serverless and scalable
 
 ---
 
@@ -16,35 +30,16 @@ For this next step, I wanted to see how this could work in a real backend enviro
 
 > 📌 **Note:** The PDF upload is still manual here (just drag and drop into S3), but everything after that—processing, extraction, storage—is fully automated. In production, uploads would be handled by apps or devices, but for this demo, I kept it simple.
 
-### ⚙️ What's Automated?
-
-- **Amazon S3**: Acts as the dropzone for resumes and triggers the workflow.
-- **AWS Lambda**: Extracts content from PDFs using Textract.
-- **Amazon DynamoDB**: Stores structured resume data.
-- **CloudWatch Logs**: Tracks the whole process for easy debugging.
-- **IAM Roles**: Make sure everything talks to each other securely.
-
-The result? A lightweight, event-driven backend that reacts to new resumes and processes them automatically— scripts to run, no manual parsing.
-
-### 🏢 Why Automate Resume Processing?
-
-In fields like HR, healthcare, and legal, documents arrive as PDFs—resumes, forms, contracts. Manually reading and entering data is slow, error-prone, and impossible to scale. Automation turns these static files into event-driven inputs: as soon as a resume lands in S3, the backend extracts key fields, stores them in DynamoDB, and makes them available for search, analysis, or alerts.
-
-This project is a hands-on demo of how AWS can bridge the gap between unstructured input and structured output. What used to take minutes per file now happens in seconds, with zero manual effort (after upload).
-
 ---
 
-## 🎥 Demo Videos
-
-Want to see it in action? Check out the `demo_videos` folder for walkthroughs and real-world examples of the workflow from upload to database entry.
-
----
-
-## 🧠 Lessons Learned
-
-- **Lambda Timeouts**: Textract can take a while—plan for longer Lambda timeouts.
-- **Parsing Gotchas**: Not all resumes are perfectly formatted. Add logic to skip or handle incomplete entries.
-- **IAM Permissions**: Full-access policies are fine for demos, but always use least privilege in production.
+## ⚡ How It Works
+1. Upload a PDF resume to the S3 bucket.
+2. S3 triggers the Lambda function.
+3. Lambda uses Textract to extract text from the PDF.
+4. The function parses out key fields (name, email, skills, etc.).
+5. Parsed data is stored in DynamoDB.
+6. An SNS notification is sent to your email.
+7. All steps are logged in CloudWatch for monitoring and debugging.
 
 ---
 
@@ -71,6 +66,20 @@ flowchart TD
 
 ---
 
+## 🎥 Demo Videos
+
+Want to see it in action? Check out the `demo_videos` folder for walkthroughs and real-world examples of the workflow from upload to database entry.
+
+---
+
+## 🧠 Lessons Learned
+
+- **Lambda Timeouts**: Textract can take a while—plan for longer Lambda timeouts.
+- **Parsing Gotchas**: Not all resumes are perfectly formatted. Add logic to skip or handle incomplete entries.
+- **IAM Permissions**: Full-access policies are fine for demos, but always use least privilege in production.
+
+---
+
 ## 📚 Resources
 - [Interactive Setup & Deployment Instructions](./INSTRUCTIONS.md)
 - [AWS Lambda Docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
@@ -78,6 +87,18 @@ flowchart TD
 - [Amazon S3 Docs](https://docs.aws.amazon.com/s3/index.html)
 - [Amazon DynamoDB Docs](https://docs.aws.amazon.com/dynamodb/index.html)
 - [Amazon SNS Docs](https://docs.aws.amazon.com/sns/index.html)
+
+---
+
+## 🤝 Contributing
+
+Contributions, suggestions, and bug reports are welcome! Feel free to open an issue or submit a pull request.
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
