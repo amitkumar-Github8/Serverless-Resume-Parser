@@ -4,6 +4,29 @@ Welcome to the Serverless Resume Parser! Follow this interactive guide to get yo
 
 ---
 
+## 🏁 Progress
+
+⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️ 0% | 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 100%
+
+As you complete each step, check the boxes below to track your progress!
+
+---
+
+## 🗂️ Quick Links
+- [Prerequisites](#-prerequisites-checklist)
+- [1. Create IAM Role](#1-create-iam-role-for-lambda)
+- [2. Create S3 Bucket](#2-create-s3-bucket)
+- [3. Create DynamoDB Table](#3-create-dynamodb-table)
+- [4. Set Up SNS Topic](#4-set-up-sns-topic-for-email-alerts)
+- [5. Create Lambda Function](#5-create-lambda-function)
+- [6. Add Lambda Code](#6-add-lambda-code)
+- [7. Add S3 Trigger](#7-add-s3-trigger-to-lambda)
+- [8. Test the Full Flow](#8-test-the-full-flow)
+- [Common Pitfalls & Pro Tips](#-common-pitfalls--pro-tips)
+- [Demo Video](#-demo-video)
+
+---
+
 ## ✅ Prerequisites Checklist
 - [ ] **AWS Account** (not root user)
 - [ ] **Region:** us-east-1 (N. Virginia)
@@ -42,6 +65,8 @@ Welcome to the Serverless Resume Parser! Follow this interactive guide to get yo
 - [ ] (Optional) Adjust public access settings as needed
 - [ ] Click **Create bucket**
 
+> 📦 **Pro Tip:** Use a unique bucket name to avoid conflicts with existing buckets in AWS.
+
 </details>
 
 ---
@@ -53,6 +78,8 @@ Welcome to the Serverless Resume Parser! Follow this interactive guide to get yo
 - [ ] Table name: `Resumes`
 - [ ] Partition key: `ResumeID` (type: String)
 - [ ] Click **Create table**
+
+> 🗃️ **Note:** Double-check the table name and partition key—they must match what's in your Lambda code!
 
 </details>
 
@@ -85,6 +112,8 @@ Welcome to the Serverless Resume Parser! Follow this interactive guide to get yo
 - [ ] Role: **Use existing role** → `ResumeParserLambdaRole`
 - [ ] Click **Create function**
 
+> 🐍 **Tip:** Make sure to select Python 3.12 for compatibility with the provided code.
+
 </details>
 
 ---
@@ -113,6 +142,8 @@ Welcome to the Serverless Resume Parser! Follow this interactive guide to get yo
 - [ ] Suffix: `.pdf`
 - [ ] Click **Add**
 
+> 🔗 **Tip:** This step connects your S3 bucket to Lambda so uploads trigger processing automatically.
+
 </details>
 
 ---
@@ -131,6 +162,26 @@ Welcome to the Serverless Resume Parser! Follow this interactive guide to get yo
 🎉 **All done! Your serverless resume parser is live!**
 
 </details>
+
+---
+
+<details>
+<summary>💡 <strong>Common Pitfalls & Pro Tips (click to expand)</strong></summary>
+
+- **IAM Permissions:** If Lambda can't access Textract, S3, or DynamoDB, double-check the attached policies.
+- **Region Mismatch:** Make sure all your AWS resources are in the same region (`us-east-1`).
+- **SNS Email Not Arriving:** Check your spam folder and confirm the subscription email.
+- **DynamoDB Table Empty:** Double-check the table name and partition key in both the AWS Console and your Lambda code.
+- **CloudWatch Logs Missing:** Attach `AWSLambdaBasicExecutionRole` or `CloudWatchLogsFullAccess` to your Lambda role.
+- **PDF Not Triggering Lambda:** Make sure the S3 trigger is set up correctly and the file ends with `.pdf`.
+
+</details>
+
+---
+
+## 🎬 Demo Video
+
+If you want a visual walkthrough, check out the `demo_videos` folder in this repo!
 
 ---
 
