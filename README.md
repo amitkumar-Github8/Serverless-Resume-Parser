@@ -14,7 +14,7 @@ This project isn't about perfection. It's about learning, experimenting, and get
 
 For this next step, I wanted to see how this could work in a real backend environment. That meant introducing automation, event triggers, and cloud storage. The goal? Automate the entire resume parsing flow using serverless AWS tools.
 
-> 📌 Note: The PDF upload is still manual here (just drag and drop into S3), but everything after that—processing, extraction, storage—is fully automated. In production, uploads would be handled by apps or devices, but for this demo, I kept it simple.
+> 📌 **Note:** The PDF upload is still manual here (just drag and drop into S3), but everything after that—processing, extraction, storage—is fully automated. In production, uploads would be handled by apps or devices, but for this demo, I kept it simple.
 
 ### ⚙️ What's Automated?
 
@@ -51,6 +51,15 @@ Want to see it in action? Check out the `demo_videos` folder for walkthroughs an
 ## 🚀 Quick Start
 
 - [ ] [Check out the Interactive Setup Guide](./INSTRUCTIONS.md)
+- [ ] Make sure you have an [AWS Account](https://aws.amazon.com/)
+- [ ] [Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [ ] Prepare a sample resume PDF
+
+---
+
+<details>
+<summary>🗺️ <strong>Architecture Overview (click to expand)</strong></summary>
+
 ```mermaid
 flowchart TD
     A[S3: Upload Resume PDF] -->|Triggers| B[Lambda Function]
@@ -61,25 +70,28 @@ flowchart TD
     C --> B
 ```
 
-- **IAM**: Secure roles and permissions for Lambda
-- **S3**: PDF upload triggers Lambda
-- **Lambda**: Uses Textract for OCR, parses resume, stores data in DynamoDB, sends SNS notifications
-- **DynamoDB**: Stores parsed resume data
-- **CloudWatch**: Logs and monitors Lambda execution
-- **SNS**: Email notifications on new resume uploads
+- **IAM**: Secure roles and permissions for Lambda ([docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html))
+- **S3**: PDF upload triggers Lambda ([docs](https://docs.aws.amazon.com/s3/index.html))
+- **Lambda**: Uses Textract for OCR, parses resume, stores data in DynamoDB, sends SNS notifications ([docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html))
+- **DynamoDB**: Stores parsed resume data ([docs](https://docs.aws.amazon.com/dynamodb/index.html))
+- **CloudWatch**: Logs and monitors Lambda execution ([docs](https://docs.aws.amazon.com/cloudwatch/index.html))
+- **SNS**: Email notifications on new resume uploads ([docs](https://docs.aws.amazon.com/sns/index.html))
+
+</details>
 
 ---
 
-## 🧠 Lambda Function Logic
+<details>
+<summary>🧠 <strong>Lambda Function Logic (click to expand)</strong></summary>
 
-1. Triggered by S3 upload
-2. Uses Textract to extract text from PDF
-3. Parses for name, skills, and education
-4. Stores parsed data in DynamoDB
-5. Sends SNS notification
-6. Logs all steps for monitoring
+- [ ] Triggered by S3 upload
+- [ ] Uses Textract to extract text from PDF
+- [ ] Parses for name, skills, and education
+- [ ] Stores parsed data in DynamoDB
+- [ ] Sends SNS notification
+- [ ] Logs all steps for monitoring
 
-> ⚠️ **Note:** Replace `<your-account-id>` in the Lambda code with your actual AWS account ID for SNS notifications.
+</details>
 
 ---
 
