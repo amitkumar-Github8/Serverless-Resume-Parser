@@ -1,11 +1,10 @@
-# 🚀 Setup & Deployment Instructions (Beginner-Friendly)
+# 🚀 Setup & Deployment Instructions 
 
 Welcome to the Serverless Resume Parser! This guide will walk you through every step to get your project running on AWS, even if you're new to cloud services. Let's get started! 🎉
 
 ---
 
-<details>
-<summary>1️⃣ <strong>Create an IAM User for AWS Console Access</strong></summary>
+## 1️⃣ Create an IAM User for AWS Console Access
 
 - [ ] Go to [IAM Console](https://console.aws.amazon.com/iam/)
 - [ ] Click **Users** → **Add user**
@@ -37,12 +36,9 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 
 > 💡 **Tip:** This user will be your main admin for deploying and managing the resume parser project.
 
-</details>
-
 ---
 
-<details>
-<summary>2️⃣ <strong>Create an IAM Role for Lambda Execution</strong></summary>
+## 2️⃣ Create an IAM Role for Lambda Execution
 
 - [ ] Go to **IAM → Roles → Create Role**
 - [ ] Use Case: **AWS Service → Lambda**
@@ -57,12 +53,9 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 
 > 🛡️ **Note:** This role lets Lambda access all the AWS services it needs to process resumes.
 
-</details>
-
 ---
 
-<details>
-<summary>3️⃣ <strong>Create an S3 Bucket for Resumes</strong></summary>
+## 3️⃣ Create an S3 Bucket for Resumes
 
 - [ ] Go to **S3 → Create bucket**
 - [ ] Bucket name: `resume-parser-uploads-demo`
@@ -72,12 +65,9 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 
 > 📦 **Pro Tip:** Use a unique bucket name to avoid conflicts with existing buckets in AWS.
 
-</details>
-
 ---
 
-<details>
-<summary>4️⃣ <strong>Create a DynamoDB Table</strong></summary>
+## 4️⃣ Create a DynamoDB Table
 
 - [ ] Go to **DynamoDB → Create Table**
 - [ ] Table name: `ParsedResumes`
@@ -87,12 +77,9 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 
 > 🗃️ **Note:** Double-check the table name and partition key—they must match what's in your Lambda code!
 
-</details>
-
 ---
 
-<details>
-<summary>5️⃣ <strong>Create an SNS Topic</strong></summary>
+## 5️⃣ Create an SNS Topic
 
 - [ ] Go to **SNS → Create Topic**
 - [ ] Type: **Standard**
@@ -103,12 +90,9 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 
 > 📢 **Tip:** SNS will notify you by email every time a resume is processed!
 
-</details>
-
 ---
 
-<details>
-<summary>6️⃣ <strong>Create Lambda Function</strong></summary>
+## 6️⃣ Create Lambda Function
 
 - [ ] Go to **Lambda → Create Function**
 - [ ] Name: `ResumeParserFunction`
@@ -118,12 +102,9 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 
 > ⚙️ **Tip:** Make sure to select Python 3.12 for compatibility with the provided code.
 
-</details>
-
 ---
 
-<details>
-<summary>7️⃣ <strong>Add Lambda Code</strong></summary>
+## 7️⃣ Add Lambda Code
 
 - [ ] Replace the default code with your updated resume parsing script (from this repo)
 - [ ] Update these lines in your code:
@@ -133,12 +114,9 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 
 > 🧠 **Note:** This is where the magic happens! Your Lambda will now parse resumes and store the results.
 
-</details>
-
 ---
 
-<details>
-<summary>8️⃣ <strong>Add S3 Trigger to Lambda</strong></summary>
+## 8️⃣ Add S3 Trigger to Lambda
 
 - [ ] In your Lambda, go to **Add trigger**
 - [ ] Select **S3**
@@ -148,12 +126,9 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 
 > 🔁 **Tip:** This connects your S3 bucket to Lambda so uploads trigger processing automatically.
 
-</details>
-
 ---
 
-<details>
-<summary>9️⃣ <strong>Enable CloudWatch Logs</strong></summary>
+## 9️⃣ Enable CloudWatch Logs
 
 - [ ] By default, Lambda logs to CloudWatch.
 - [ ] To view logs:
@@ -163,12 +138,9 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 
 > 🔍 **Tip:** CloudWatch logs are your best friend for debugging and monitoring!
 
-</details>
-
 ---
 
-<details>
-<summary>🧪 <strong>How to Test It</strong></summary>
+## 🧪 How to Test It
 
 - [ ] Upload a PDF resume to the S3 bucket
 - [ ] It will trigger Lambda
@@ -177,9 +149,7 @@ Welcome to the Serverless Resume Parser! This guide will walk you through every 
 - [ ] Notification sent via SNS
 - [ ] Logs appear in CloudWatch
 
-🎉 **That's it! Your serverless resume parser is live and ready to use.**
-
-</details>
+> 🎉 **That's it! Your serverless resume parser is live and ready to use.**
 
 ---
 
