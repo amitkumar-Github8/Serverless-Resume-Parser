@@ -3,7 +3,7 @@ import boto3
 import uuid
 
 # UPDATE YOUR AWS REGION HERE IF DIFFERENT
-AWS_REGION = 'us-east-1'
+AWS_REGION = '' #AWS Region
 
 # Initialize AWS clients
 textract = boto3.client('textract', region_name=AWS_REGION)
@@ -11,7 +11,7 @@ dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
 sns = boto3.client('sns', region_name=AWS_REGION)
 
 # UPDATE TABLE NAME TO YOUR DYNAMODB TABLE
-TABLE_NAME = "Resumes"
+TABLE_NAME = "" #DynamoDB Table Name
 
 # UPDATE SNS TOPIC ARN WITH YOUR OWN TOPIC ARN
 TOPIC_ARN = "arn:aws:sns:us-east-1:<your-account-id>:ResumeUploadAlert"
