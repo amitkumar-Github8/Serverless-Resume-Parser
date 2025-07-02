@@ -1,16 +1,12 @@
 # Serverless-Resume-Parser
 
-![GitHub last commit](https://img.shields.io/github/last-commit/amitkumar-Github8/Serverless-Resume-Parser)
-![GitHub issues](https://img.shields.io/github/issues/amitkumar-Github8/Serverless-Resume-Parser)
-![GitHub stars](https://img.shields.io/github/stars/amitkumar-Github8/Serverless-Resume-Parser?style=social)
-
-Hey there! 👋
+Hey there!
 
 Welcome to my Serverless Resume Parser project. I built this because I was tired of manually digging through resumes—so I figured, why not let AWS do the heavy lifting? This project lets you upload a PDF resume to S3, then automatically extracts the important stuff (like name, skills, education) using AWS Lambda and Textract. The results go into DynamoDB, and you'll get an email notification when pdf is uploaded to the S3 bucket. Plus, everything's logged in CloudWatch so you can see what's happening under the hood.
 
 ---
 
-## ✨ Features
+## Features
 - Upload PDF resumes to S3 and trigger automatic parsing
 - Extracts name, email, phone, education, skills, projects, experience, and certifications
 - Stores structured data in DynamoDB
@@ -20,7 +16,7 @@ Welcome to my Serverless Resume Parser project. I built this because I was tired
 
 ---
 
-## 📝 Project Story & Real-World Motivation
+## Project Story & Real-World Motivation
 
 In the first version of this project, I took a local-first approach: drop a PDF resume into a folder, run a Python script, and save the extracted text to a file using AWS Textract. It was a great way to get hands-on with Textract and see what it could do—but let's be honest, it was all pretty manual.
 
@@ -28,11 +24,11 @@ This project isn't about perfection. It's about learning, experimenting, and get
 
 For this next step, I wanted to see how this could work in a real backend environment. That meant introducing automation, event triggers, and cloud storage. The goal? Automate the entire resume parsing flow using serverless AWS tools.
 
-> 📌 **Note:** The PDF upload is still manual here (just drag and drop into S3), but everything after that—processing, extraction, storage—is fully automated. In production, uploads would be handled by apps or devices, but for this demo, I kept it simple.
+> **Note:** The PDF upload is still manual here (just drag and drop into S3), but everything after that—processing, extraction, storage—is fully automated. In production, uploads would be handled by apps or devices, but for this demo, I kept it simple.
 
 ---
 
-## ⚡ How It Works
+## How It Works
 1. Upload a PDF resume to the S3 bucket.
 2. S3 triggers the Lambda function.
 3. Lambda uses Textract to extract text from the PDF.
@@ -43,7 +39,7 @@ For this next step, I wanted to see how this could work in a real backend enviro
 
 ---
 
-## 🗺️ Architecture Overview
+## Architecture Overview
 
 Here's how the serverless resume parser works at a high level:
 
@@ -66,13 +62,13 @@ flowchart TD
 
 ---
 
-## 🎥 Demo Videos
+## Demo Videos
 
 Want to see it in action? Check out the `demo_videos` folder for walkthroughs and real-world examples of the workflow from upload to database entry.
 
 ---
 
-## 🧠 Lessons Learned
+## Lessons Learned
 
 - **Lambda Timeouts**: Textract can take a while—plan for longer Lambda timeouts.
 - **Parsing Gotchas**: Not all resumes are perfectly formatted. Add logic to skip or handle incomplete entries.
@@ -80,7 +76,7 @@ Want to see it in action? Check out the `demo_videos` folder for walkthroughs an
 
 ---
 
-## 📚 Resources
+## Resources
 - [Interactive Setup & Deployment Instructions](./INSTRUCTIONS.md)
 - [AWS Lambda Docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
 - [Amazon Textract Docs](https://docs.aws.amazon.com/textract/latest/dg/what-is.html)
@@ -90,15 +86,9 @@ Want to see it in action? Check out the `demo_videos` folder for walkthroughs an
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, suggestions, and bug reports are welcome! Feel free to open an issue or submit a pull request.
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
