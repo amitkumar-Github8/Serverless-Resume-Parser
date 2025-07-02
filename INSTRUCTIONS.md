@@ -23,7 +23,6 @@ As you complete each step, check the boxes below to track your progress!
 - [7. Add S3 Trigger](#7-add-s3-trigger-to-lambda)
 - [8. Test the Full Flow](#8-test-the-full-flow)
 - [Common Pitfalls & Pro Tips](#-common-pitfalls--pro-tips)
-- [Demo Video](#-demo-video)
 
 ---
 
@@ -149,12 +148,6 @@ As you complete each step, check the boxes below to track your progress!
 - **DynamoDB Table Empty:** Double-check the table name and partition key in both the AWS Console and your Lambda code.
 - **CloudWatch Logs Missing:** Attach `AWSLambdaBasicExecutionRole` or `CloudWatchLogsFullAccess` to your Lambda role.
 - **PDF Not Triggering Lambda:** Make sure the S3 trigger is set up correctly and the file ends with `.pdf`.
-
----
-
-## 🎬 Demo Video
-
-If you want a visual walkthrough, check out the `demo_videos` folder in this repo!
 
 ---
 
