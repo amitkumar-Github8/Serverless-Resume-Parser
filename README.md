@@ -34,39 +34,6 @@ This project is a hands-on demo of how AWS can bridge the gap between unstructur
 
 ---
 
-## 🛠️ Step-by-Step Implementation
-
-Here's a quick walkthrough of how I set things up, in the order I tackled each piece. Nothing overly complex—just enough to get a fully working flow from upload to database entry.
-
-1. **S3 Setup — Upload as a Trigger**
-   - Created an S3 bucket to act as the dropzone for incoming PDFs. Every time a file is uploaded, it automatically triggers the next step.
-   - Added an S3 event trigger to my Lambda function (ObjectCreated event).
-   - ⚠️ In production, you'd usually narrow this to a folder or file type filter. For now, keeping it wide open helped test faster.
-
-2. **Lambda Function — Extract and Parse on the Fly**
-   - Lambda pulls the PDF from S3, sends it to Textract, parses the returned lines into structured fields, and stores each parsed record into DynamoDB.
-   - Used the `detect_document_text` API for fast, synchronous extraction.
-   - For more complex docs, you could use Textract's other operations.
-
-3. **Textract Output Processing — Turning Lines Into Records**
-   - Textract returns blocks of text as separate lines. I looped through each line and looked for patterns like Name:, Skills:, Education: etc.
-   - Whenever a new Name appeared, I considered that the start of a new record.
-   - The format of your source PDF matters—a lot! If you're working with messy scans, you'll likely need a smarter parser.
-
-4. **DynamoDB Storage — Saving Each Record**
-   - Each parsed record is stored as a new item in DynamoDB.
-   - Used a unique ID as the partition key, and skipped any record that didn't include it.
-
-5. **Monitoring with CloudWatch Logs**
-   - Every step—from event trigger to Textract response to final record insert—is logged automatically in CloudWatch Logs.
-   - Super helpful for debugging and validation.
-
-6. **IAM Roles — Permissions That Make It Work**
-   - Created an IAM role for the Lambda function with all the right policies.
-   - In real-world scenarios, always follow the principle of least privilege.
-
----
-
 ## 🎥 Demo Videos
 
 Want to see it in action? Check out the `demo_videos` folder for walkthroughs and real-world examples of the workflow from upload to database entry.
