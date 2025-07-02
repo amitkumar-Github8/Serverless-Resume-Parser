@@ -35,8 +35,7 @@ As you complete each step, check the boxes below to track your progress!
 
 ---
 
-<details>
-<summary>### 1️⃣ Create IAM Role for Lambda</summary>
+### 1️⃣ Create IAM Role for Lambda
 
 - [ ] Go to **IAM > Roles > Create role** ([AWS IAM Docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html))
 - [ ] Choose **Lambda** as the trusted entity
@@ -52,12 +51,9 @@ As you complete each step, check the boxes below to track your progress!
 
 > 💡 **Tip:** This role gives Lambda all the permissions it needs to work with AWS services!
 
-</details>
-
 ---
 
-<details>
-<summary>### 2️⃣ Create S3 Bucket</summary>
+### 2️⃣ Create S3 Bucket
 
 - [ ] Go to **S3 > Create bucket** ([AWS S3 Docs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html))
 - [ ] Name it: `resume-parser-bucket-123`
@@ -67,12 +63,9 @@ As you complete each step, check the boxes below to track your progress!
 
 > 📦 **Pro Tip:** Use a unique bucket name to avoid conflicts with existing buckets in AWS.
 
-</details>
-
 ---
 
-<details>
-<summary>### 3️⃣ Create DynamoDB Table</summary>
+### 3️⃣ Create DynamoDB Table
 
 - [ ] Go to **DynamoDB > Create Table** ([AWS DynamoDB Docs](https://docs.aws.amazon.com/amazondynamodb/latest/gettingstartedguide/GettingStarted.CreateTable.html))
 - [ ] Table name: `Resumes`
@@ -81,12 +74,9 @@ As you complete each step, check the boxes below to track your progress!
 
 > 🗃️ **Note:** Double-check the table name and partition key—they must match what's in your Lambda code!
 
-</details>
-
 ---
 
-<details>
-<summary>### 4️⃣ Set Up SNS Topic for Email Alerts</summary>
+### 4️⃣ Set Up SNS Topic for Email Alerts
 
 - [ ] Go to **SNS > Topics > Create topic** ([AWS SNS Docs](https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html))
 - [ ] Type: **Standard**
@@ -99,12 +89,9 @@ As you complete each step, check the boxes below to track your progress!
 
 > 🔔 **You'll get an email every time a resume is processed!**
 
-</details>
-
 ---
 
-<details>
-<summary>### 5️⃣ Create Lambda Function</summary>
+### 5️⃣ Create Lambda Function
 
 - [ ] Go to **Lambda > Create function** ([AWS Lambda Docs](https://docs.aws.amazon.com/lambda/latest/dg/getting-started-create-function.html))
 - [ ] Name: `ResumeParserFunction`
@@ -114,12 +101,9 @@ As you complete each step, check the boxes below to track your progress!
 
 > 🐍 **Tip:** Make sure to select Python 3.12 for compatibility with the provided code.
 
-</details>
-
 ---
 
-<details>
-<summary>### 6️⃣ Add Lambda Code</summary>
+### 6️⃣ Add Lambda Code
 
 - [ ] Open your Lambda function in the AWS Console
 - [ ] Replace the code with the contents of `Lambda/lambda_function.py` from this repo
@@ -127,12 +111,9 @@ As you complete each step, check the boxes below to track your progress!
 
 > ⚠️ **Don't forget:** Replace `<your-account-id>` in the ARN with your real AWS account ID!
 
-</details>
-
 ---
 
-<details>
-<summary>### 7️⃣ Add S3 Trigger to Lambda</summary>
+### 7️⃣ Add S3 Trigger to Lambda
 
 - [ ] In your Lambda function, go to **Configuration > Triggers**
 - [ ] Click **Add trigger**
@@ -144,12 +125,9 @@ As you complete each step, check the boxes below to track your progress!
 
 > 🔗 **Tip:** This step connects your S3 bucket to Lambda so uploads trigger processing automatically.
 
-</details>
-
 ---
 
-<details>
-<summary>### 8️⃣ Test the Full Flow!</summary>
+### 8️⃣ Test the Full Flow!
 
 - [ ] Go to **S3 > resume-parser-bucket-123**
 - [ ] Click **Upload > Add Files** and select your resume PDF
@@ -161,12 +139,9 @@ As you complete each step, check the boxes below to track your progress!
 
 🎉 **All done! Your serverless resume parser is live!**
 
-</details>
-
 ---
 
-<details>
-<summary>💡 <strong>Common Pitfalls & Pro Tips (click to expand)</strong></summary>
+## 💡 Common Pitfalls & Pro Tips
 
 - **IAM Permissions:** If Lambda can't access Textract, S3, or DynamoDB, double-check the attached policies.
 - **Region Mismatch:** Make sure all your AWS resources are in the same region (`us-east-1`).
@@ -174,8 +149,6 @@ As you complete each step, check the boxes below to track your progress!
 - **DynamoDB Table Empty:** Double-check the table name and partition key in both the AWS Console and your Lambda code.
 - **CloudWatch Logs Missing:** Attach `AWSLambdaBasicExecutionRole` or `CloudWatchLogsFullAccess` to your Lambda role.
 - **PDF Not Triggering Lambda:** Make sure the S3 trigger is set up correctly and the file ends with `.pdf`.
-
-</details>
 
 ---
 
