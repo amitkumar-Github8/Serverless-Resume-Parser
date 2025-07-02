@@ -1,153 +1,185 @@
-# 🚀 Setup & Deployment Instructions
+# 🚀 Setup & Deployment Instructions (Beginner-Friendly)
 
-Welcome to the Serverless Resume Parser! Follow this interactive guide to get your project up and running on AWS. If you get stuck, check the tips along the way. Let's go! 🎉
-
----
-
-## 🏁 Progress
-
-⬜️⬜️⬜️⬜️⬜️⬜️⬜️⬜️ 0% | 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 100%
-
-As you complete each step, check the boxes below to track your progress!
+Welcome to the Serverless Resume Parser! This guide will walk you through every step to get your project running on AWS, even if you're new to cloud services. Let's get started! 🎉
 
 ---
 
-## 🗂️ Quick Links
-- [Prerequisites](#-prerequisites-checklist)
-- [1. Create IAM Role](#1-create-iam-role-for-lambda)
-- [2. Create S3 Bucket](#2-create-s3-bucket)
-- [3. Create DynamoDB Table](#3-create-dynamodb-table)
-- [4. Set Up SNS Topic](#4-set-up-sns-topic-for-email-alerts)
-- [5. Create Lambda Function](#5-create-lambda-function)
-- [6. Add Lambda Code](#6-add-lambda-code)
-- [7. Add S3 Trigger](#7-add-s3-trigger-to-lambda)
-- [8. Test the Full Flow](#8-test-the-full-flow)
-- [Common Pitfalls & Pro Tips](#-common-pitfalls--pro-tips)
+<details>
+<summary>1️⃣ <strong>Create an IAM User for AWS Console Access</strong></summary>
+
+- [ ] Go to [IAM Console](https://console.aws.amazon.com/iam/)
+- [ ] Click **Users** → **Add user**
+- [ ] Name: `ResumeParserUser`
+- [ ] Access type: Check **Programmatic access** and **AWS Management Console access**
+- [ ] Set a password
+- [ ] Permissions: Attach these AWS managed policies:
+  - [ ] `AmazonS3FullAccess`
+  - [ ] `AmazonDynamoDBFullAccess`
+  - [ ] `AmazonTextractFullAccess`
+  - [ ] `AWSLambda_FullAccess`
+  - [ ] `CloudWatchFullAccess`
+  - [ ] `AmazonSNSFullAccess`
+- [ ] Add Inline Policy for `iam:PassRole`:
+  - Name: `PassLambdaRolePolicy`
+  - Policy JSON:
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::<your-account-id>:role/ResumeLambdaExecutionRole"
+    }
+  ]
+}
+```
+
+> 💡 **Tip:** This user will be your main admin for deploying and managing the resume parser project.
+
+</details>
 
 ---
 
-## ✅ Prerequisites Checklist
-- [ ] **AWS Account** (not root user)
-- [ ] **Region:** us-east-1 (N. Virginia)
-- [ ] **AWS CLI** installed ([Install Guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
-- [ ] **Sample resume PDF** ready to upload
+<details>
+<summary>2️⃣ <strong>Create an IAM Role for Lambda Execution</strong></summary>
 
----
-
-### 1️⃣ Create IAM Role for Lambda
-
-- [ ] Go to **IAM > Roles > Create role** ([AWS IAM Docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html))
-- [ ] Choose **Lambda** as the trusted entity
-- [ ] Click **Next**
-- [ ] Attach these policies:
+- [ ] Go to **IAM → Roles → Create Role**
+- [ ] Use Case: **AWS Service → Lambda**
+- [ ] Name: `ResumeLambdaExecutionRole`
+- [ ] Attach policies:
+  - [ ] `AmazonS3ReadOnlyAccess`
   - [ ] `AmazonTextractFullAccess`
   - [ ] `AmazonDynamoDBFullAccess`
-  - [ ] `AmazonS3ReadOnlyAccess`
   - [ ] `CloudWatchLogsFullAccess`
   - [ ] `AmazonSNSFullAccess`
-- [ ] Name your role: `ResumeParserLambdaRole`
-- [ ] Click **Create role**
+- [ ] Click **Create Role**
 
-> 💡 **Tip:** This role gives Lambda all the permissions it needs to work with AWS services!
+> 🛡️ **Note:** This role lets Lambda access all the AWS services it needs to process resumes.
+
+</details>
 
 ---
 
-### 2️⃣ Create S3 Bucket
+<details>
+<summary>3️⃣ <strong>Create an S3 Bucket for Resumes</strong></summary>
 
-- [ ] Go to **S3 > Create bucket** ([AWS S3 Docs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html))
-- [ ] Name it: `resume-parser-bucket-123`
-- [ ] Set region to **us-east-1**
-- [ ] (Optional) Adjust public access settings as needed
+- [ ] Go to **S3 → Create bucket**
+- [ ] Bucket name: `resume-parser-uploads-demo`
+- [ ] Region: Same as Lambda (e.g., `us-east-1`)
+- [ ] (Optional) Disable Block Public Access only if necessary
 - [ ] Click **Create bucket**
 
 > 📦 **Pro Tip:** Use a unique bucket name to avoid conflicts with existing buckets in AWS.
 
+</details>
+
 ---
 
-### 3️⃣ Create DynamoDB Table
+<details>
+<summary>4️⃣ <strong>Create a DynamoDB Table</strong></summary>
 
-- [ ] Go to **DynamoDB > Create Table** ([AWS DynamoDB Docs](https://docs.aws.amazon.com/amazondynamodb/latest/gettingstartedguide/GettingStarted.CreateTable.html))
-- [ ] Table name: `Resumes`
-- [ ] Partition key: `ResumeID` (type: String)
-- [ ] Click **Create table**
+- [ ] Go to **DynamoDB → Create Table**
+- [ ] Table name: `ParsedResumes`
+- [ ] Partition key: `ResumeID` (String)
+- [ ] Leave other options as default
+- [ ] Click **Create Table**
 
 > 🗃️ **Note:** Double-check the table name and partition key—they must match what's in your Lambda code!
 
+</details>
+
 ---
 
-### 4️⃣ Set Up SNS Topic for Email Alerts
+<details>
+<summary>5️⃣ <strong>Create an SNS Topic</strong></summary>
 
-- [ ] Go to **SNS > Topics > Create topic** ([AWS SNS Docs](https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html))
+- [ ] Go to **SNS → Create Topic**
 - [ ] Type: **Standard**
-- [ ] Name: `ResumeUploadAlert`
-- [ ] Click **Create topic**
-- [ ] Click your new topic > **Create subscription**
-- [ ] Protocol: **Email**
-- [ ] Endpoint: *Your email address*
-- [ ] Check your inbox and **confirm the subscription**
+- [ ] Name: `ResumeUploadAlerts`
+- [ ] Click **Create Topic**
+- [ ] Copy the Topic ARN for Lambda use
+- [ ] Add email subscription to the topic and confirm it in your email
 
-> 🔔 **You'll get an email every time a resume is processed!**
+> 📢 **Tip:** SNS will notify you by email every time a resume is processed!
+
+</details>
 
 ---
 
-### 5️⃣ Create Lambda Function
+<details>
+<summary>6️⃣ <strong>Create Lambda Function</strong></summary>
 
-- [ ] Go to **Lambda > Create function** ([AWS Lambda Docs](https://docs.aws.amazon.com/lambda/latest/dg/getting-started-create-function.html))
+- [ ] Go to **Lambda → Create Function**
 - [ ] Name: `ResumeParserFunction`
 - [ ] Runtime: **Python 3.12**
-- [ ] Role: **Use existing role** → `ResumeParserLambdaRole`
-- [ ] Click **Create function**
+- [ ] Execution Role: **Use existing role** → Select `ResumeLambdaExecutionRole`
+- [ ] Click **Create Function**
 
-> 🐍 **Tip:** Make sure to select Python 3.12 for compatibility with the provided code.
+> ⚙️ **Tip:** Make sure to select Python 3.12 for compatibility with the provided code.
 
----
-
-### 6️⃣ Add Lambda Code
-
-- [ ] Open your Lambda function in the AWS Console
-- [ ] Replace the code with the contents of `Lambda/lambda_function.py` from this repo
-- [ ] Update `TOPIC_ARN` in the code with your actual SNS topic ARN (see the SNS topic details page)
-
-> ⚠️ **Don't forget:** Replace `<your-account-id>` in the ARN with your real AWS account ID!
+</details>
 
 ---
 
-### 7️⃣ Add S3 Trigger to Lambda
+<details>
+<summary>7️⃣ <strong>Add Lambda Code</strong></summary>
 
-- [ ] In your Lambda function, go to **Configuration > Triggers**
-- [ ] Click **Add trigger**
-- [ ] Source: **S3**
-- [ ] Bucket: `resume-parser-bucket-123`
+- [ ] Replace the default code with your updated resume parsing script (from this repo)
+- [ ] Update these lines in your code:
+  - `TABLE_NAME = "ParsedResumes"`
+  - `TOPIC_ARN = "arn:aws:sns:us-east-1:<your-account-id>:ResumeUploadAlerts"`
+- [ ] Click **Deploy**
+
+> 🧠 **Note:** This is where the magic happens! Your Lambda will now parse resumes and store the results.
+
+</details>
+
+---
+
+<details>
+<summary>8️⃣ <strong>Add S3 Trigger to Lambda</strong></summary>
+
+- [ ] In your Lambda, go to **Add trigger**
+- [ ] Select **S3**
+- [ ] Bucket: `resume-parser-uploads-demo`
 - [ ] Event type: **PUT**
-- [ ] Suffix: `.pdf`
 - [ ] Click **Add**
 
-> 🔗 **Tip:** This step connects your S3 bucket to Lambda so uploads trigger processing automatically.
+> 🔁 **Tip:** This connects your S3 bucket to Lambda so uploads trigger processing automatically.
+
+</details>
 
 ---
 
-### 8️⃣ Test the Full Flow!
+<details>
+<summary>9️⃣ <strong>Enable CloudWatch Logs</strong></summary>
 
-- [ ] Go to **S3 > resume-parser-bucket-123**
-- [ ] Click **Upload > Add Files** and select your resume PDF
-- [ ] Wait 15–30 seconds ⏳
-- [ ] Check:
-  - [ ] **DynamoDB > Items**: See your new resume entry
-  - [ ] **CloudWatch > Logs**: View Lambda logs
-  - [ ] **Your email**: Look for the SNS alert
+- [ ] By default, Lambda logs to CloudWatch.
+- [ ] To view logs:
+  - Go to **CloudWatch → Logs**
+  - Click on the log group: `/aws/lambda/ResumeParserFunction`
+  - Inspect recent invocations and debug errors
 
-🎉 **All done! Your serverless resume parser is live!**
+> 🔍 **Tip:** CloudWatch logs are your best friend for debugging and monitoring!
+
+</details>
 
 ---
 
-## 💡 Common Pitfalls & Pro Tips
+<details>
+<summary>🧪 <strong>How to Test It</strong></summary>
 
-- **IAM Permissions:** If Lambda can't access Textract, S3, or DynamoDB, double-check the attached policies.
-- **Region Mismatch:** Make sure all your AWS resources are in the same region (`us-east-1`).
-- **SNS Email Not Arriving:** Check your spam folder and confirm the subscription email.
-- **DynamoDB Table Empty:** Double-check the table name and partition key in both the AWS Console and your Lambda code.
-- **CloudWatch Logs Missing:** Attach `AWSLambdaBasicExecutionRole` or `CloudWatchLogsFullAccess` to your Lambda role.
-- **PDF Not Triggering Lambda:** Make sure the S3 trigger is set up correctly and the file ends with `.pdf`.
+- [ ] Upload a PDF resume to the S3 bucket
+- [ ] It will trigger Lambda
+- [ ] Text is extracted using Textract
+- [ ] Structured data saved in DynamoDB
+- [ ] Notification sent via SNS
+- [ ] Logs appear in CloudWatch
+
+🎉 **That's it! Your serverless resume parser is live and ready to use.**
+
+</details>
 
 ---
 
