@@ -1,8 +1,30 @@
 # Serverless-Resume-Parser
 
-A scalable, serverless application that automates resume processing using AWS. Upload a PDF resume to Amazon S3, and AWS Lambda (using Textract) extracts key details like name, skills, and education, storing them in DynamoDB. Notifications are sent via SNS, and all activity is logged in CloudWatch.
+Hey there! 👋
 
-## Architecture
+Welcome to my Serverless Resume Parser project. I built this because I was tired of manually digging through resumes—so I figured, why not let AWS do the heavy lifting? This app lets you upload a PDF resume to S3, then automatically extracts the important stuff (like name, skills, education) using AWS Lambda and Textract. The results go into DynamoDB, and you'll get an email notification when it's done. Plus, everything's logged in CloudWatch so you can see what's happening under the hood.
+
+---
+
+## 🤔 Why I Built This
+
+I wanted a hands-off way to process resumes for side projects and hackathons, and I thought it'd be fun to learn more about AWS's serverless tools. If you're looking for a simple, scalable way to parse resumes (or just want to see how all these AWS services fit together), you're in the right place!
+
+---
+
+## 🚀 Quick Start
+
+- [ ] [Check out the Interactive Setup Guide](./INSTRUCTIONS.md)
+```mermaid
+flowchart TD
+    A[S3: Upload Resume PDF] -->|Triggers| B[Lambda Function]
+    B --> C[Textract: OCR]
+    B --> D[DynamoDB: Store Data]
+    B --> E[SNS: Email Notification]
+    B --> F[CloudWatch: Logs]
+    C --> B
+```
+
 - **IAM**: Secure roles and permissions for Lambda
 - **S3**: PDF upload triggers Lambda
 - **Lambda**: Uses Textract for OCR, parses resume, stores data in DynamoDB, sends SNS notifications
@@ -10,33 +32,32 @@ A scalable, serverless application that automates resume processing using AWS. U
 - **CloudWatch**: Logs and monitors Lambda execution
 - **SNS**: Email notifications on new resume uploads
 
-## Lambda Function Logic
-- Triggered by S3 upload
-- Uses Textract to extract text from PDF
-- Parses for name, skills, and education
-- Stores parsed data in DynamoDB
-- Sends SNS notification
-- Logs all steps for monitoring
+---
+
+## 🧠 Lambda Function Logic
+
+1. Triggered by S3 upload
+2. Uses Textract to extract text from PDF
+3. Parses for name, skills, and education
+4. Stores parsed data in DynamoDB
+5. Sends SNS notification
+6. Logs all steps for monitoring
+
+> ⚠️ **Note:** Replace `<your-account-id>` in the Lambda code with your actual AWS account ID for SNS notifications.
 
 ---
 
-**Note:** Replace `<your-account-id>` in the Lambda code with your actual AWS account ID for SNS notifications.
-
----
-
-## Issues Faced & How I Solved Them
+<details>
+<summary>❓ <strong>FAQ & Troubleshooting (click to expand)</strong></summary>
 
 ### ✅ 1. Textract AccessDeniedException
 **Error Message:**
 ```
 User is not authorized to perform: textract:DetectDocumentText
 ```
-**Cause:**
-- The Lambda function's IAM role did not have permission to call textract:DetectDocumentText.
-
 **Solution:**
-- Attached the `AmazonTextractFullAccess` policy to the Lambda's execution role.
-- Verified that the role was properly linked under the Lambda's "Configuration > Permissions" tab.
+- Attach the `AmazonTextractFullAccess` policy to the Lambda's execution role.
+- Verify the role is linked under Lambda's "Configuration > Permissions" tab.
 
 ---
 
@@ -45,16 +66,10 @@ User is not authorized to perform: textract:DetectDocumentText
 ```
 Unable to get object metadata from S3. Check object key, region and/or access permissions.
 ```
-**Cause:**
-- The Lambda function (Textract) couldn't access the PDF in the S3 bucket due to:
-  - Wrong region
-  - Lack of permission
-  - Bucket/object not publicly accessible
-
 **Solution:**
-- Ensured S3 bucket and Lambda were in the same region (`us-east-1`).
-- Gave `s3:GetObject` permission to the Lambda role.
-- Made sure the file was uploaded correctly and accessible in S3.
+- Ensure S3 bucket and Lambda are in the same region (`us-east-1`).
+- Give `s3:GetObject` permission to the Lambda role.
+- Make sure the file is uploaded correctly and accessible in S3.
 
 ---
 
@@ -63,51 +78,48 @@ Unable to get object metadata from S3. Check object key, region and/or access pe
 ```
 Textract failed: Could not connect to the endpoint URL
 ```
-**Cause:**
-- Lambda was deployed in a region where Textract is not available (e.g., `eu-north-1`).
-
 **Solution:**
-- Re-created the Lambda function in `us-east-1`, a region that supports Textract.
-- Made sure all services (Lambda, S3, Textract, DynamoDB) were in the same region.
+- Use a region that supports Textract (e.g., `us-east-1`).
+- Make sure all services are in the same region.
 
 ---
 
 ### ✅ 4. No Output in DynamoDB Table
 **Symptoms:**
-- Resume was uploaded to S3
-- Logs printed resume data
-- But no data was inserted into DynamoDB
-
-**Cause:**
-- DynamoDB `put_item()` was silently failing due to:
-  - Wrong table name
-  - Region mismatch
-  - Missing primary key (`ResumeID`)
-
+- Resume uploaded to S3, logs printed resume data, but no data in DynamoDB.
 **Solution:**
-- Ensured the table name in the Lambda matches the actual DynamoDB table.
-- Verified that `ResumeID` is used as the partition key.
-- Logged the resume data right before inserting into the table for debugging.
+- Ensure table name in Lambda matches DynamoDB table.
+- Use `ResumeID` as the partition key.
+- Log resume data before inserting for debugging.
 
 ---
 
 ### ✅ 5. CloudWatch Logs Not Visible
 **Symptoms:**
-- Lambda triggered but no logs appeared in CloudWatch.
-
-**Cause:**
-- IAM role lacked permission to publish logs.
-
+- Lambda triggered but no logs in CloudWatch.
 **Solution:**
-- Attached `AWSLambdaBasicExecutionRole` or `CloudWatchLogsFullAccess` to the Lambda's IAM role.
-- Added explicit `print()` and logging statements inside the Lambda function.
+- Attach `AWSLambdaBasicExecutionRole` or `CloudWatchLogsFullAccess` to Lambda's IAM role.
+- Add `print()` and logging statements in Lambda.
 
 ---
 
 ### ✅ 6. SNS Emails Not Delivered
-**Cause:**
-- SNS subscription was created but email confirmation was not accepted.
-
 **Solution:**
-- Opened email inbox and clicked the confirmation link in the SNS subscription request.
-- Resent the confirmation if missed.
+- Confirm the SNS subscription via the email link.
+- Resend confirmation if missed.
+
+</details>
+
+---
+
+## 📚 Resources
+- [Interactive Setup & Deployment Instructions](./INSTRUCTIONS.md)
+- [AWS Lambda Docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
+- [Amazon Textract Docs](https://docs.aws.amazon.com/textract/latest/dg/what-is.html)
+- [Amazon S3 Docs](https://docs.aws.amazon.com/s3/index.html)
+- [Amazon DynamoDB Docs](https://docs.aws.amazon.com/dynamodb/index.html)
+- [Amazon SNS Docs](https://docs.aws.amazon.com/sns/index.html)
+
+---
+
+*Need more help? Open an issue or check the [AWS documentation](https://docs.aws.amazon.com/).*
