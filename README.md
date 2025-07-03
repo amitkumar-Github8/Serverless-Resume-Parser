@@ -4,6 +4,8 @@ Hey there!
 
 Welcome to my Serverless Resume Parser project. I built this because I was tired of manually digging through resumes—so I figured, why not let AWS do the heavy lifting? This project lets you upload a PDF resume to S3, then automatically extracts the important stuff (like name, skills, education) using AWS Lambda and Textract. The results go into DynamoDB, and you'll get an email notification when pdf is uploaded to the S3 bucket. Plus, everything's logged in CloudWatch so you can see what's happening under the hood.
 
+![Serverless Resume Parser Architecture](Architecture_Diagram/Architecture.jpg)
+
 ---
 
 ## Features
@@ -41,8 +43,6 @@ For this next step, I wanted to see how this could work in a real backend enviro
 
 ## Architecture Overview
 
-![Serverless Resume Parser Architecture](Architecture_Diagram/Architecture.jpg)
-
 Here's how the serverless resume parser works at a high level:
 
 ```mermaid
@@ -68,13 +68,9 @@ flowchart TD
 
 Want to see it in action? Check out the `demo_videos` folder for walkthroughs and real-world examples of the workflow from upload to database entry.
 
----
+**YouTube Demo:** [Watch the project demo on YouTube](https://youtu.be/J11U2qLHAzA)
 
-## Lessons Learned
-
-- **Lambda Timeouts**: Textract can take a while—plan for longer Lambda timeouts.
-- **Parsing Gotchas**: Not all resumes are perfectly formatted. Add logic to skip or handle incomplete entries.
-- **IAM Permissions**: Full-access policies are fine for demos, but always use least privilege in production.
+**Blog Post:** [Read the full build story on Hashnode](https://resumeparser.hashnode.dev/building-a-serverless-resume-parser-using-aws-s3-lambda-textract-python-dynamodb-sns-cloudwatch)
 
 ---
 
