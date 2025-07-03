@@ -41,6 +41,8 @@ For this next step, I wanted to see how this could work in a real backend enviro
 
 ## Architecture Overview
 
+![Serverless Resume Parser Architecture](Architecture_Diagram/Architecture.jpg)
+
 Here's how the serverless resume parser works at a high level:
 
 ```mermaid
