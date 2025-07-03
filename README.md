@@ -64,7 +64,7 @@ flowchart TD
 
 ---
 
-## Demo Videos
+## Demo
 
 Want to see it in action? Check out the `demo_videos` folder for walkthroughs and real-world examples of the workflow from upload to database entry.
 
