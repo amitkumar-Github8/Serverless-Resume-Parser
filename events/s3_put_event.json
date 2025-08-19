@@ -1,0 +1,10 @@
+{
+  "Records": [
+    {
+      "s3": {
+        "bucket": { "name": "resume-parser-uploads-demo" },
+        "object": { "key": "Resume.pdf" }
+      }
+    }
+  ]
+}

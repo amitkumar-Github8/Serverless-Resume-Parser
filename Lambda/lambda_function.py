@@ -1,48 +1,67 @@
 import json
-import boto3
+import os
+import re
 import uuid
+import logging
+from urllib.parse import unquote_plus
+from typing import List, Dict, Any
 
-# UPDATE YOUR AWS REGION HERE IF DIFFERENT
-AWS_REGION = '' #AWS Region
+# Configure structured logging
+logger = logging.getLogger()
+if not logger.handlers:
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
+logger.setLevel(logging.INFO)
 
-# Initialize AWS clients
-textract = boto3.client('textract', region_name=AWS_REGION)
-dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
-sns = boto3.client('sns', region_name=AWS_REGION)
 
-# UPDATE TABLE NAME TO YOUR DYNAMODB TABLE
-TABLE_NAME = "" #DynamoDB Table Name
+# Environment-driven configuration (set in Lambda console)
+TABLE_NAME = os.environ.get("TABLE_NAME", "")
+TOPIC_ARN = os.environ.get("TOPIC_ARN", "")
 
-# UPDATE SNS TOPIC ARN WITH YOUR OWN TOPIC ARN
-TOPIC_ARN = "arn:aws:sns:us-east-1:<your-account-id>:ResumeUploadAlert"
 
-# HELPER FUNCTION TO DETECT IF A LINE IS A SECTION HEADING
-def is_section_heading(line):
-    keywords = ["summary", "education", "skills", "projects", "experience", "certifications", "achievements", "profile"]
-    return any(word in line.lower() for word in keywords) and len(line.strip()) < 40
+def _get_boto_clients():
+    """Create AWS clients/resources lazily and region-aware."""
+    import boto3  # local import to avoid hard dependency during unit tests that import parsing only
+    session = boto3.session.Session()
+    region = os.environ.get('AWS_REGION') or session.region_name
 
-def lambda_handler(event, context):
-    print("Received event:", json.dumps(event))
+    if region:
+        textract = boto3.client('textract', region_name=region)
+        dynamodb = boto3.resource('dynamodb', region_name=region)
+        sns = boto3.client('sns', region_name=region)
+    else:
+        # Fallback to default config if region not resolved (useful in some local test scenarios)
+        textract = boto3.client('textract')
+        dynamodb = boto3.resource('dynamodb')
+        sns = boto3.client('sns')
+    return textract, dynamodb, sns
 
-    # EXTRACT BUCKET AND FILE NAME FROM S3 EVENT
-    bucket = event['Records'][0]['s3']['bucket']['name']
-    document = event['Records'][0]['s3']['object']['key']
-    print(f"Processing file: {document} from bucket: {bucket}")
 
-    # CALL AMAZON TEXTRACT TO EXTRACT TEXT FROM PDF
-    response = textract.detect_document_text(
-        Document={'S3Object': {'Bucket': bucket, 'Name': document}}
-    )
+# Helper: detect if a line is a section heading
+def is_section_heading(line: str) -> bool:
+    keywords = [
+        "summary",
+        "education",
+        "skills",
+        "projects",
+        "experience",
+        "certifications",
+        "achievements",
+        "profile",
+    ]
+    text = line.strip().lower()
+    return any(word in text for word in keywords) and 2 <= len(text) <= 40
 
-    lines = [block['Text'] for block in response['Blocks'] if block['BlockType'] == 'LINE']
-    print("Textract extracted lines:")
-    for line in lines:
-        print(line)
 
-    # INITIALIZE EMPTY FIELDS FOR STRUCTURED RESUME DATA
-    parsed_resume = {
-        'ResumeID': str(uuid.uuid4()),
-        'SourceFile': document,
+EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+PHONE_RE = re.compile(r"(\+?\d[\d\s().-]{8,}\d)")
+
+
+def parse_resume_lines(lines: List[str]) -> Dict[str, Any]:
+    """
+    Pure parsing logic. Extracts fields from OCR lines.
+    Returns a dict without ResumeID/SourceFile (added by handler).
+    """
+    parsed = {
         'Name': '',
         'Email': '',
         'Phone': '',
@@ -50,50 +69,122 @@ def lambda_handler(event, context):
         'Skills': [],
         'Projects': [],
         'Experience': [],
-        'Certifications': []
+        'Certifications': [],
     }
 
-    # EXTRACT CONTACT INFORMATION (EMAIL, PHONE, NAME)
+    # Email & phone
     for line in lines:
-        if '@' in line and not parsed_resume['Email']:
-            parsed_resume['Email'] = line.strip()
-        if any(char.isdigit() for char in line) and len(line.strip()) >= 10 and not parsed_resume['Phone']:
-            parsed_resume['Phone'] = line.strip()
-        if not parsed_resume['Name'] and any(name_word in line.lower() for name_word in ['name', 'resume']) is False:
-            parsed_resume['Name'] = line.strip()
+        if not parsed['Email']:
+            m = EMAIL_RE.search(line)
+            if m:
+                parsed['Email'] = m.group(0)
+        if not parsed['Phone']:
+            m = PHONE_RE.search(line)
+            if m:
+                parsed['Phone'] = m.group(0)
+        if parsed['Email'] and parsed['Phone']:
+            break
 
-    # EXTRACT CONTENT BY DETECTING SECTIONS (SKILLS, EDUCATION, ETC.)
+    # Name heuristic: first non-empty line not containing email/phone keywords
+    for line in lines:
+        text = line.strip()
+        if not text:
+            continue
+        if EMAIL_RE.search(text) or PHONE_RE.search(text):
+            continue
+        # Prefer lines with 2-4 capitalized words
+        words = [w for w in re.split(r"\s+", text) if w]
+        cap_words = [w for w in words if re.match(r"^[A-Z][a-zA-Z.'-]*$", w)]
+        if 1 <= len(cap_words) <= 4:
+            parsed['Name'] = text
+            break
+    if not parsed['Name'] and lines:
+        parsed['Name'] = lines[0].strip()
+
+    # Sections
     current_section = None
     for line in lines:
         if is_section_heading(line):
             current_section = line.lower()
             continue
-        if current_section:
-            if "education" in current_section:
-                parsed_resume['Education'].append(line)
-            elif "skill" in current_section:
-                parsed_resume['Skills'].append(line)
-            elif "project" in current_section:
-                parsed_resume['Projects'].append(line)
-            elif "experience" in current_section:
-                parsed_resume['Experience'].append(line)
-            elif "certificate" in current_section or "achievement" in current_section:
-                parsed_resume['Certifications'].append(line)
+        if not current_section:
+            continue
+        if "education" in current_section:
+            parsed['Education'].append(line)
+        elif "skill" in current_section:
+            parsed['Skills'].append(line)
+        elif "project" in current_section:
+            parsed['Projects'].append(line)
+        elif "experience" in current_section:
+            parsed['Experience'].append(line)
+        elif (
+            "certificate" in current_section
+            or "certification" in current_section
+            or "certifications" in current_section
+            or "achievement" in current_section
+            or "achievements" in current_section
+        ):
+            parsed['Certifications'].append(line)
 
-    print("Parsed Resume Data:", parsed_resume)
+    return parsed
 
-    # SAVE STRUCTURED DATA TO DYNAMODB
-    table = dynamodb.Table(TABLE_NAME)
-    table.put_item(Item=parsed_resume)
 
-    # SEND SNS NOTIFICATION ON SUCCESSFUL PARSING
-    sns.publish(
-        TopicArn=TOPIC_ARN,
-        Subject="New Resume Parsed",
-        Message=f"New resume processed: {parsed_resume.get('Name', 'Unknown')}"
-    )
+def lambda_handler(event, context):
+    logger.info("event=%s", json.dumps(event))
 
-    return {
-        'statusCode': 200,
-        'body': json.dumps("Resume parsed and stored successfully!")
+    # Extract bucket and object from S3 event
+    try:
+        record = event['Records'][0]
+        bucket = record['s3']['bucket']['name']
+        document = record['s3']['object']['key']
+    except (KeyError, IndexError) as e:
+        logger.error("Invalid S3 event structure: %s", e)
+        return {"statusCode": 400, "body": json.dumps("Bad event structure")}
+
+    # URL-decode S3 object key (handles spaces, special chars)
+    document = unquote_plus(document)
+    logger.info("Processing file=%s bucket=%s", document, bucket)
+
+    textract, dynamodb, sns = _get_boto_clients()
+
+    # Textract OCR
+    try:
+        response = textract.detect_document_text(
+            Document={'S3Object': {'Bucket': bucket, 'Name': document}}
+        )
+        lines = [b['Text'] for b in response.get('Blocks', []) if b.get('BlockType') == 'LINE']
+    except Exception as e:
+        logger.exception("Textract failed: %s", e)
+        return {"statusCode": 500, "body": json.dumps("Textract error")}
+
+    parsed_core = parse_resume_lines(lines)
+    parsed_resume = {
+        'ResumeID': str(uuid.uuid4()),
+        'SourceFile': document,
+        **parsed_core,
     }
+
+    # Persist to DynamoDB if configured
+    if not TABLE_NAME:
+        logger.warning("TABLE_NAME env var not set; skipping DynamoDB write")
+    else:
+        try:
+            table = dynamodb.Table(TABLE_NAME)
+            table.put_item(Item=parsed_resume)
+        except Exception as e:
+            logger.exception("DynamoDB put_item failed: %s", e)
+            return {"statusCode": 500, "body": json.dumps("Database error")}
+
+    # Notify via SNS if configured
+    if TOPIC_ARN:
+        try:
+            # Avoid sending PII: use source file reference instead of name/phone/email
+            msg = f"New resume processed from file: {parsed_resume.get('SourceFile', 'unknown')}"
+            sns.publish(TopicArn=TOPIC_ARN, Subject="New Resume Parsed", Message=msg)
+        except Exception as e:
+            logger.exception("SNS publish failed: %s", e)
+            # Non-fatal: continue
+    else:
+        logger.info("TOPIC_ARN not set; skipping SNS notification")
+
+    return {"statusCode": 200, "body": json.dumps("Resume parsed and stored successfully!")}

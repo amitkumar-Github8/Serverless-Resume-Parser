@@ -1,5 +1,6 @@
 # Serverless-Resume-Parser
 
+
 Hey there!
 
 Welcome to my Serverless Resume Parser project. I built this because I was tired of manually digging through resumes—so I figured, why not let AWS do the heavy lifting? This project lets you upload a PDF resume to S3, then automatically extracts the important stuff (like name, skills, education) using AWS Lambda and Textract. The results go into DynamoDB, and you'll get an email notification when pdf is uploaded to the S3 bucket. Plus, everything's logged in CloudWatch so you can see what's happening under the hood.
@@ -66,7 +67,7 @@ flowchart TD
 
 ## Demo
 
-Want to see it in action? Check out the `demo_videos` folder for walkthroughs and real-world examples of the workflow from upload to database entry.
+Want to see it in action? Check out the `demo_video` folder for a walkthrough video of the workflow from upload to database entry.
 
 **YouTube Demo:** [Watch the project demo on YouTube](https://youtu.be/J11U2qLHAzA)
 
@@ -90,4 +91,33 @@ Contributions, suggestions, and bug reports are welcome! Feel free to open an is
 
 ---
 
-*Need more help? Open an issue or check the [AWS documentation](https://docs.aws.amazon.com/).*
+---
+
+## Configuration
+
+Set these environment variables on the Lambda function configuration (Console → Configuration → Environment variables):
+
+- `TABLE_NAME` → your DynamoDB table name (e.g., ParsedResumes)
+- `TOPIC_ARN` → your SNS Topic ARN (e.g., arn:aws:sns:us-east-1:123456789012:ResumeUploadAlerts)
+
+These replace hardcoded values in the function for safer, environment-specific deployments.
+
+---
+
+## Local development and tests
+
+This repo includes a small, pure parsing function and unit tests.
+
+1) Create a virtual environment and install dev deps:
+
+    - requirements are in `requirements-dev.txt`.
+
+2) Run tests:
+
+    - use `pytest` from the repo root; tests reside in `tests/`.
+
+Optional: use the sample S3 event in `events/s3_put_event.json` to understand the expected trigger payload.
+
+---
+
+*Need more help? Open an issue or check the [AWS documentation](https://docs.aws.amazon.com/).* 
